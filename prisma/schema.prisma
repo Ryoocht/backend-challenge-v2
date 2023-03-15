@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String
+  bookings  Booking[]
+
+  @@map("users")
+}
+
+model Venue {
+  id        String    @id @default(uuid())
+  name      String
+  addressId String    @unique
+  address   Address   @relation(fields: [addressId], references: [id])
+  concerts  Concert[]
+
+  @@map("venues")
+}
+
+model Address {
+  id           String  @id @default(uuid())
+  fullAddress  String
+  streetNumber String
+  streetName   String
+  suburb       String
+  state        String
+  country      String
+  postcode     String  @db.VarChar(10)
+  venue        Venue[]
+
+  @@map("addresses")
+}
+
+model Concert {
+  id          String                 @id @default(uuid())
+  title       String
+  description String
+  date        DateTime
+  capacity    Int
+  venueId     String
+  Venue       Venue                  @relation(fields: [venueId], references: [id])
+  categories  CategoriesOnConcerts[]
+  bookings    Booking[]
+
+  @@map("concerts")
+}
+
+model Category {
+  id       String                 @id @default(uuid())
+  name     String
+  concerts CategoriesOnConcerts[]
+
+  @@map("categories")
+}
+
+model CategoriesOnConcerts {
+  concertId  String
+  categoryId String
+  concert    Concert  @relation(fields: [concertId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@id([concertId, categoryId])
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  userId    String
+  concertId String
+  user      User     @relation(fields: [userId], references: [id])
+  Concert   Concert  @relation(fields: [concertId], references: [id])
+
+  @@map("bookings")
+}
