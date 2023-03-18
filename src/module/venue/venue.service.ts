@@ -1,13 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { CreateVenueDto } from './dto/create-venue.dto';
 import { UpdateVenueDto } from './dto/update-venue.dto';
+import PrismaProvider from 'prisma/prisma-provider';
 
 @Injectable()
 export class VenueService {
-  create(createVenueDto: CreateVenueDto) {
-    console.log({ createVenueDto });
+  private readonly prisma = PrismaProvider.getConnection();
 
-    return 'This action adds a new venue';
+  create(createVenueDto: CreateVenueDto) {
+    const venue = this.prisma.venue.create({
+      data: {
+        name: createVenueDto.name,
+        address: {
+          create: {
+            ...createVenueDto.address,
+          },
+        },
+      },
+    });
+    return venue;
   }
 
   findAll() {
