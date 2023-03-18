@@ -5,6 +5,7 @@ CREATE TABLE `users` (
     `lastName` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
 
+    UNIQUE INDEX `users_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -71,19 +72,19 @@ CREATE TABLE `bookings` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `venues` ADD CONSTRAINT `venues_addressId_fkey` FOREIGN KEY (`addressId`) REFERENCES `addresses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `venues` ADD CONSTRAINT `venues_addressId_fkey` FOREIGN KEY (`addressId`) REFERENCES `addresses`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `concerts` ADD CONSTRAINT `concerts_venueId_fkey` FOREIGN KEY (`venueId`) REFERENCES `venues`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `concerts` ADD CONSTRAINT `concerts_venueId_fkey` FOREIGN KEY (`venueId`) REFERENCES `venues`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `CategoriesOnConcerts` ADD CONSTRAINT `CategoriesOnConcerts_concertId_fkey` FOREIGN KEY (`concertId`) REFERENCES `concerts`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `CategoriesOnConcerts` ADD CONSTRAINT `CategoriesOnConcerts_concertId_fkey` FOREIGN KEY (`concertId`) REFERENCES `concerts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `CategoriesOnConcerts` ADD CONSTRAINT `CategoriesOnConcerts_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `categories`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `CategoriesOnConcerts` ADD CONSTRAINT `CategoriesOnConcerts_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `bookings` ADD CONSTRAINT `bookings_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `bookings` ADD CONSTRAINT `bookings_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `bookings` ADD CONSTRAINT `bookings_concertId_fkey` FOREIGN KEY (`concertId`) REFERENCES `concerts`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `bookings` ADD CONSTRAINT `bookings_concertId_fkey` FOREIGN KEY (`concertId`) REFERENCES `concerts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

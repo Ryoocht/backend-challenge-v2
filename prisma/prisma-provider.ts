@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { ApiConfigService } from 'src/util/api-config-service';
+import { ApiConfigService } from '../src/util/api-config-service';
 import PrismaConnection from './prisma-connection';
 
 export default abstract class PrismaProvider {
@@ -11,6 +11,7 @@ export default abstract class PrismaProvider {
         new ApiConfigService(new ConfigService()),
       );
     }
+
     return this.prismaConnection;
   }
 }
