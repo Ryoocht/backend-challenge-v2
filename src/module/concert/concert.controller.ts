@@ -1,20 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { ConcertService } from './concert.service';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { UpdateConcertDto } from './dto/update-concert.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AccessGuard } from '../auth/guard/access.guard';
+import { PaginationDto } from 'src/util/dto/pagination.dto';
 
-@Controller('concert')
+@Controller('concerts')
+@ApiTags('Concerts')
+// @ApiBearerAuth('Authorization')
+// @UseGuards(AccessGuard)
 export class ConcertController {
   constructor(private readonly concertService: ConcertService) {}
-
+  
   @Post()
   create(@Body() createConcertDto: CreateConcertDto) {
     return this.concertService.create(createConcertDto);
   }
 
   @Get()
-  findAll() {
-    return this.concertService.findAll();
+  findAvailableConcerts(@Query() paginationDto: PaginationDto) {
+    return this.concertService.findAvailableConcerts(paginationDto);
+  }
+
+  @Get(':userId')
+  findBookedConcerts(@Param('userId') userId: string) {
+    return this.concertService.findBookedConcerts(userId)
   }
 
   @Get(':id')
