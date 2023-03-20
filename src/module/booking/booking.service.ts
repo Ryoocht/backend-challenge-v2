@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import PrismaProvider from 'prisma/prisma-provider';
+import { PaginationDto } from 'src/util/dto/pagination.dto';
+import { User } from '@prisma/client';
 @Injectable()
 export class BookingsService {
   private readonly prisma = PrismaProvider.getConnection();
@@ -13,15 +15,20 @@ export class BookingsService {
     return booking;
   }
 
-  findAll() {
-    return `This action returns all bookings`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} booking`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} booking`;
+  getBookedConcerts(user: User, pagination: PaginationDto) {
+    const bookings = this.prisma.booking.findMany({
+      take: pagination.take,
+      skip: pagination.take * (pagination.page - 1),
+      where: {
+        userId: user.id,
+      },
+      include: {
+        concert: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+    return bookings;
   }
 }

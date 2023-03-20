@@ -4,15 +4,17 @@ import { UpdateConcertDto } from './dto/update-concert.dto';
 import PrismaProvider from 'prisma/prisma-provider';
 import { PaginationDto } from 'src/util/dto/pagination.dto';
 import { count } from 'console';
+import { Venue } from '@prisma/client';
 
 @Injectable()
 export class ConcertService {
   private readonly prisma = PrismaProvider.getConnection();
 
-  create(createConcertDto: CreateConcertDto) {
+  create(venue: Venue, createConcertDto: CreateConcertDto) {
     const concert = this.prisma.concert.create({
       data: {
         ...createConcertDto,
+        venue: { connect: { id: venue.id } },
         categories: {
           create: createConcertDto.categories.map((category) => ({
             category: {
@@ -22,7 +24,6 @@ export class ConcertService {
             },
           })),
         },
-        venueId: 'f9f623c8-05b7-4c28-9db3-bf20739139fe',
       },
     });
     return concert;
@@ -58,58 +59,47 @@ export class ConcertService {
     return concerts;
   }
 
-  findBookedConcerts(userId: string) {
-    const concerts = this.prisma.booking.findMany({
-      where: { userId },
-      select: {
-        concert: true,
-      },
-    });
-    return concerts;
-  }
+  async update(
+    venue: Venue,
+    concertId: string,
+    updateConcertDto: UpdateConcertDto,
+  ) {
+    // const categories = updateConcertDto.categories ?? [];
 
-  findOne(id: number) {
-    return `This action returns a #${id} concert`;
-  }
-
-  async update(id: string, updateConcertDto: UpdateConcertDto) {
-    const categories = updateConcertDto.categories.map((category) => ({
-      where: { name: category.name },
-      create: { name: category.name },
-    }));
-
-    const concert = await this.prisma.concert.update({
-      where: { id },
+    // const updatedCategories = await Promise.all([
+    //   categories.map(async (category) => {
+    //     const { name } = category;
+    //     return this.prisma.category.update({
+    //        where: { }
+    //     })
+    //   }),
+    // ]);
+    const updatedConcert = await this.prisma.concert.update({
+      where: { id: concertId },
       data: {
         ...updateConcertDto,
-        categories: { connectOrCreate: categories },
+        venue: {
+          connect: { id: venue.id },
+        },
+        categories: {
+          // connectOrCreate: updateConcertDto.categories.map(category => ({
+          //   where: {
+          //     concertId_categoryId: category.name,
+          //   }
+          // }))
+        },
+      },
+      include: {
+        venue: true,
       },
     });
-
-    return concert;
-    // const concert = await this.prisma.concert.update({
-    //   where: {
-    //     id,
-    //   },
-    //   data: {
-    //     ...updateConcertDto,
-    //     categories: {
-    //       connectOrCreate: updateConcertDto.categories.map((category) => ({
-    //         where: {
-    //           name: category.name,
-    //         },
-    //         create: {
-    //           name: category.name,
-    //         },
-    //       })),
-    //     },
-    //   },
-    // });
-
-    // return concert;
+    return updatedConcert;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} concert`;
+  findOne(concertId: string) {
+    const concert = this.prisma.concert.findUnique({
+      where: { id: concertId },
+    });
+    return concert;
   }
 }

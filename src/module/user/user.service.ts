@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import PrismaProvider from 'prisma/prisma-provider';
+import { User } from '@prisma/client';
+import { PaginationDto } from 'src/util/dto/pagination.dto';
 
 @Injectable()
 export class UserService {
@@ -19,19 +20,8 @@ export class UserService {
     return user;
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  findOne(userId: string) {
+    const user = this.prisma.user.findUnique({ where: { id: userId } });
+    return user;
   }
 }

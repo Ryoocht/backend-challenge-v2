@@ -19,4 +19,9 @@ export class VenueService {
     });
     return venue;
   }
+
+  findOne(venueId: string) {
+    const venue = this.prisma.venue.findUnique({ where: { id: venueId } });
+    return venue;
+  }
 }

@@ -60,7 +60,7 @@ model Concert {
 
 model Category {
   id       String                 @id @default(uuid())
-  name     String
+  name     String                 @unique
   concerts CategoriesOnConcerts[]
 
   @@map("categories")

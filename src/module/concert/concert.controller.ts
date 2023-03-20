@@ -1,21 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { ConcertService } from './concert.service';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { UpdateConcertDto } from './dto/update-concert.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AccessGuard } from '../auth/guard/access.guard';
+import { ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from 'src/util/dto/pagination.dto';
+import { VenueGuard } from '../venue/guard/venue-guard';
+import { GetVenue } from '../venue/decorator/get-venue.decorator';
+import { Venue } from '@prisma/client';
 
 @Controller('concerts')
 @ApiTags('Concerts')
-// @ApiBearerAuth('Authorization')
-// @UseGuards(AccessGuard)
 export class ConcertController {
   constructor(private readonly concertService: ConcertService) {}
-  
+
+  @UseGuards(VenueGuard)
   @Post()
-  create(@Body() createConcertDto: CreateConcertDto) {
-    return this.concertService.create(createConcertDto);
+  create(@GetVenue() venue: Venue, @Body() createConcertDto: CreateConcertDto) {
+    return this.concertService.create(venue, createConcertDto);
   }
 
   @Get()
@@ -23,23 +33,13 @@ export class ConcertController {
     return this.concertService.findAvailableConcerts(paginationDto);
   }
 
-  @Get(':userId')
-  findBookedConcerts(@Param('userId') userId: string) {
-    return this.concertService.findBookedConcerts(userId)
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.concertService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConcertDto: UpdateConcertDto) {
-    return this.concertService.update(+id, updateConcertDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.concertService.remove(+id);
+  @UseGuards(VenueGuard)
+  @Patch(':concertId')
+  update(
+    @GetVenue() venue: Venue,
+    @Param('concertId') concertId: string,
+    @Body() updateConcertDto: UpdateConcertDto,
+  ) {
+    return this.concertService.update(venue, concertId, updateConcertDto);
   }
 }
