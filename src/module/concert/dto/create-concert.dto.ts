@@ -25,7 +25,7 @@ export class CreateConcertDto {
 
   @ApiProperty({
     description: 'Concert Date',
-    example: '2023-03-25',
+    example: '2023-03-20',
     required: true,
   })
   @DateValidatorDecorator()

@@ -14,15 +14,15 @@ export class VenueAccessStrategy extends PassportStrategy(
 
   async validate(req: Request): Promise<any> {
     const authorizationHeader = req.headers['authorization'];
-    
+
     if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
-        throw new UnauthorizedException();
+      throw new UnauthorizedException();
     }
     const token = authorizationHeader.substring(7);
     const venue = await this.venueService.findOne(token);
     if (!venue) {
       throw new UnauthorizedException();
     }
-    return venue.id;
+    return venue;
   }
 }

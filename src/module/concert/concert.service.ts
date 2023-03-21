@@ -5,23 +5,30 @@ import PrismaProvider from 'prisma/prisma-provider';
 import { PaginationDto } from 'src/util/dto/pagination.dto';
 import { count } from 'console';
 import { Venue } from '@prisma/client';
+import { GetAllAvailableConcertDto } from './dto/get-all-available-concert.dto';
 
 @Injectable()
 export class ConcertService {
   private readonly prisma = PrismaProvider.getConnection();
 
-  create(venue: Venue, createConcertDto: CreateConcertDto) {
+  async create(venueId: string, createConcertDto: CreateConcertDto) {
+    const categoryUniqueInputs = createConcertDto.categories.map(
+      (category) => ({ name: category.name }),
+    );
+
+    const categoriesData = await this.prisma.category.findMany({
+      where: { OR: categoryUniqueInputs },
+    });
+
+    const categoryIds = categoriesData.map((category) => ({ id: category.id }));
+
     const concert = this.prisma.concert.create({
       data: {
         ...createConcertDto,
-        venue: { connect: { id: venue.id } },
+        venue: { connect: { id: venueId } },
         categories: {
-          create: createConcertDto.categories.map((category) => ({
-            category: {
-              create: {
-                name: category.name,
-              },
-            },
+          create: categoryIds.map((categoryId) => ({
+            category: { connect: categoryId },
           })),
         },
       },
@@ -29,14 +36,15 @@ export class ConcertService {
     return concert;
   }
 
-  async findAvailableConcerts(paginationDto: PaginationDto) {
+  async findAvailableConcerts(getAllAvailableConcertDto: GetAllAvailableConcertDto) {
+    const { take, page, title, date, category } = getAllAvailableConcertDto
     const concerts = await this.prisma.concert.findMany({
-      take: paginationDto.take,
-      skip: paginationDto.take * (paginationDto.page - 1),
+      take,
+      skip: take * (page - 1),
       where: {
         AND: [
           {
-            date: { gte: new Date() },
+            date: { gte: date },
           },
           {
             capacity: {
@@ -60,45 +68,43 @@ export class ConcertService {
   }
 
   async update(
-    venue: Venue,
+    venueId: string,
     concertId: string,
     updateConcertDto: UpdateConcertDto,
   ) {
-    // const categories = updateConcertDto.categories ?? [];
+    const categoryUniqueInputs = updateConcertDto.categories.map(
+      (category) => ({ name: category.name }),
+    );
+    const categoriesData = await this.prisma.category.findMany({
+      where: { OR: categoryUniqueInputs },
+    });
+    const categoryIds = categoriesData.map((category) => ({ id: category.id }));
 
-    // const updatedCategories = await Promise.all([
-    //   categories.map(async (category) => {
-    //     const { name } = category;
-    //     return this.prisma.category.update({
-    //        where: { }
-    //     })
-    //   }),
-    // ]);
-    const updatedConcert = await this.prisma.concert.update({
+    const concert = await this.prisma.concert.update({
       where: { id: concertId },
       data: {
         ...updateConcertDto,
-        venue: {
-          connect: { id: venue.id },
-        },
+        venue: { connect: { id: venueId } },
         categories: {
-          // connectOrCreate: updateConcertDto.categories.map(category => ({
-          //   where: {
-          //     concertId_categoryId: category.name,
-          //   }
-          // }))
+          disconnect: updateConcertDto.categories ? [] : undefined,
+          connectOrCreate: categoryIds.map((categoryId) => ({
+            where: {
+              concertId_categoryId: { concertId, categoryId: categoryId.id },
+            },
+            create: { category: { connect: { id: categoryId.id } } },
+          })),
         },
       },
-      include: {
-        venue: true,
-      },
+      include: { categories: true },
     });
-    return updatedConcert;
+
+    return concert;
   }
 
   findOne(concertId: string) {
     const concert = this.prisma.concert.findUnique({
       where: { id: concertId },
+      include: { bookings: true },
     });
     return concert;
   }

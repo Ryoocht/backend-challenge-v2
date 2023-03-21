@@ -16,6 +16,7 @@ import { PaginationDto } from 'src/util/dto/pagination.dto';
 import { VenueGuard } from '../venue/guard/venue-guard';
 import { GetVenue } from '../venue/decorator/get-venue.decorator';
 import { Venue } from '@prisma/client';
+import { GetAllAvailableConcertDto } from './dto/get-all-available-concert.dto';
 
 @Controller('concerts')
 @ApiTags('Concerts')
@@ -24,22 +25,22 @@ export class ConcertController {
 
   @UseGuards(VenueGuard)
   @Post()
-  create(@GetVenue() venue: Venue, @Body() createConcertDto: CreateConcertDto) {
-    return this.concertService.create(venue, createConcertDto);
+  create(@GetVenue() venueId: string, @Body() createConcertDto: CreateConcertDto) {
+    return this.concertService.create(venueId, createConcertDto);
   }
 
   @Get()
-  findAvailableConcerts(@Query() paginationDto: PaginationDto) {
-    return this.concertService.findAvailableConcerts(paginationDto);
+  findAvailableConcerts(@Query() getAllAvailableConcertDto: GetAllAvailableConcertDto) {
+    return this.concertService.findAvailableConcerts(getAllAvailableConcertDto);
   }
 
   @UseGuards(VenueGuard)
   @Patch(':concertId')
   update(
-    @GetVenue() venue: Venue,
+    @GetVenue() venueId: string,
     @Param('concertId') concertId: string,
     @Body() updateConcertDto: UpdateConcertDto,
   ) {
-    return this.concertService.update(venue, concertId, updateConcertDto);
+    return this.concertService.update(venueId, concertId, updateConcertDto);
   }
 }
