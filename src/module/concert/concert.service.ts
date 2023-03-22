@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { UpdateConcertDto } from './dto/update-concert.dto';
 import PrismaProvider from 'prisma/prisma-provider';
-import { PaginationDto } from 'src/util/dto/pagination.dto';
-import { count } from 'console';
-import { Venue } from '@prisma/client';
-import { GetAllAvailableConcertDto } from './dto/get-all-available-concert.dto';
+import { ConcertListDto } from './dto/concert-list.dto';
 
 @Injectable()
 export class ConcertService {
@@ -36,28 +33,32 @@ export class ConcertService {
     return concert;
   }
 
-  async findAvailableConcerts(getAllAvailableConcertDto: GetAllAvailableConcertDto) {
-    const { take, page, title, date, category } = getAllAvailableConcertDto
+  async findAll(concertListDto: ConcertListDto) {
+    const { take, page, title, date, category } = concertListDto;
     const concerts = await this.prisma.concert.findMany({
       take,
       skip: take * (page - 1),
       where: {
-        AND: [
-          {
-            date: { gte: date },
-          },
-          {
-            capacity: {
-              gt: {
-                count: {
-                  select: {
-                    id: true,
-                  },
-                },
-              } as any,
+        title: {
+          contains: title,
+        },
+        date: date ? { equals: new Date(date) } : undefined,
+        categories: {
+          some: {
+            category: {
+              name: {
+                contains: category,
+              },
             },
           },
-        ],
+        },
+      },
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
+        },
       },
       orderBy: {
         date: 'asc',

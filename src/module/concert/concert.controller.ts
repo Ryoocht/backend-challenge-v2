@@ -16,7 +16,7 @@ import { PaginationDto } from 'src/util/dto/pagination.dto';
 import { VenueGuard } from '../venue/guard/venue-guard';
 import { GetVenue } from '../venue/decorator/get-venue.decorator';
 import { Venue } from '@prisma/client';
-import { GetAllAvailableConcertDto } from './dto/get-all-available-concert.dto';
+import { ConcertListDto } from './dto/concert-list.dto';
 
 @Controller('concerts')
 @ApiTags('Concerts')
@@ -30,8 +30,8 @@ export class ConcertController {
   }
 
   @Get()
-  findAvailableConcerts(@Query() getAllAvailableConcertDto: GetAllAvailableConcertDto) {
-    return this.concertService.findAvailableConcerts(getAllAvailableConcertDto);
+  findAll(@Query() concertListDto: ConcertListDto) {
+    return this.concertService.findAll(concertListDto);
   }
 
   @UseGuards(VenueGuard)

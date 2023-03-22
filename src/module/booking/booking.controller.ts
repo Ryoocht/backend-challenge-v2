@@ -5,11 +5,12 @@ import {
   Param,
   UseGuards,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { BookingsService } from './booking.service';
 import { UserGuard } from '../user/guard/user-guard';
 import { PaginationDto } from 'src/util/dto/pagination.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from '../user/decorator/get-user.decorator';
 
 @Controller('bookings')
@@ -29,5 +30,11 @@ export class BookingsController {
   @Get()
   findAll(@GetUser() userId: string, @Query() paginationDto: PaginationDto) {
     return this.bookingsService.getBookedConcerts(userId, paginationDto);
+  }
+
+  @UseGuards(UserGuard)
+  @Delete(':concertId')
+  delete(@GetUser() userId: string, @Param('concertId') concertId: string) {
+    return this.bookingsService.removeBooking(userId, concertId)
   }
 }

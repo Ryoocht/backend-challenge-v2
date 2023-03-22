@@ -43,4 +43,18 @@ export class BookingsService {
     });
     return bookings;
   }
+
+  async removeBooking(userId: string, concertId: string) {
+    const concert = await this.concertService.findOne(concertId);
+    let bookingId = '';
+    concert.bookings.forEach((booking) => {
+      if (booking.userId === userId) bookingId = booking.id;
+    });
+    const booking = this.prisma.booking.delete({
+      where: {
+        id: bookingId,
+      },
+    });
+    return booking;
+  }
 }

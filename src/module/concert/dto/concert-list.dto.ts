@@ -3,7 +3,7 @@ import { IsOptional, IsString } from 'class-validator';
 import { DateValidatorDecorator } from 'src/util/decorator/date-validator.decorator';
 import { PaginationDto } from 'src/util/dto/pagination.dto';
 
-export class GetAllAvailableConcertDto extends PaginationDto {
+export class ConcertListDto extends PaginationDto {
   @ApiProperty({
     description: 'Search by Title',
     example: 'The Jazz Masters',
